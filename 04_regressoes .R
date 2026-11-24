@@ -8,17 +8,15 @@
 # extremos). Tabelas em resultados/tabelas/ (Word + CSV).
 # =============================================================================
 
-# install.packages(c("data.table", "dplyr", "ggplot2", "fixest", "flextable", "lmtest"))
+# install.packages(c("data.table", "dplyr", "fixest", "flextable", "lmtest"))
 
 library(data.table)
 library(dplyr)
-library(ggplot2)
 library(fixest)
 library(flextable)
 library(lmtest)
 
 dir.create("resultados/tabelas", recursive = TRUE, showWarnings = FALSE)
-dir.create("resultados/figuras", recursive = TRUE, showWarnings = FALSE)
 
 base <- readRDS("dados/intermed/base_analise.rds")
 
@@ -67,18 +65,6 @@ m4 <- modelos[["(4)"]]
 m4_lm <- lm(formula_4, data = base)
 bp    <- bptest(m4_lm)
 print(bp)
-
-# Resíduos contra o tamanho do eleitorado: formato de funil = variância maior
-# nos municípios pequenos
-fig5 <- tibble(log_aptos = log(base$aptos), residuo = resid(m4_lm)) |>
-  ggplot(aes(log_aptos, residuo)) +
-  geom_point(alpha = 0.15, size = 0.5) +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  labs(x = "Log do número de eleitores aptos", y = "Resíduo do modelo (4)") +
-  theme_minimal(base_size = 11)
-print(fig5)
-ggsave("resultados/figuras/fig5_residuos_aptos.png", fig5,
-       width = 7, height = 4.5, dpi = 300, bg = "white")
 
 # Multicolinearidade imperfeita (SW 6.7): correlação entre renda e
 # alfabetização, citada no texto. Quanto mais perto de 1, maior a variância dos
@@ -203,6 +189,28 @@ formatar_tabela <- function(df, nota) {
     autofit()
 }
 
+# Tabela em LaTeX (booktabs) para colar no Overleaf: \input{arquivo.tex}
+# Só o "tabular"; título, fonte e nota vão no texto, como pede a ABNT.
+salvar_tex <- function(df, nome) {
+  esc <- function(x) {
+    x <- gsub("([%$&_#])", "\\\\\\1", x)
+    x <- gsub("R²", "R\\\\textsuperscript{2}", x)
+    gsub("<", "$<$", x)
+  }
+  corpo <- as.data.frame(lapply(df, \(col) esc(as.character(col))))
+  linha <- function(v) paste0(paste(v, collapse = " & "), " \\\\")
+  linhas <- apply(corpo, 1, linha)
+  # Linha separando coeficientes das estatísticas de ajuste (tabelas de regressão)
+  i_obs <- which(corpo[[1]] == "Observações")
+  if (length(i_obs) == 1) linhas <- append(linhas, "\\midrule", after = i_obs - 1)
+  tex <- c(paste0("\\begin{tabular}{l", strrep("c", ncol(df) - 1), "}"),
+           "\\toprule", linha(esc(names(df))), "\\midrule",
+           linhas, "\\bottomrule", "\\end{tabular}")
+  con <- file(file.path("resultados/tabelas", paste0(nome, ".tex")), "w", encoding = "UTF-8")
+  writeLines(tex, con)
+  close(con)
+}
+
 nota_base <- paste(
   "Nota: variável dependente é a taxa de abstenção (% dos aptos) no 1º turno da",
   "eleição presidencial de 2026. Erros-padrão robustos à heterocedasticidade (HC1)",
@@ -240,6 +248,10 @@ fwrite(testes, "resultados/tabelas/tab6_testes.csv", sep = ";", bom = TRUE)
 ft6 <- formatar_tabela(testes, paste(
   "Nota: testes no modelo (4). Os testes F usam erros-padrão robustos (HC1).",
   "Fonte: TSE e IBGE."))
+
+salvar_tex(tab4,   "tab4_regressoes")
+salvar_tex(tab5,   "tab5_robustez")
+salvar_tex(testes, "tab6_testes")
 
 save_as_docx(
   "Tabela 4 – Determinantes da abstenção municipal" = ft4,
