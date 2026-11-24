@@ -3,7 +3,8 @@
 # Econometria I – Abstenção eleitoral x nível socioeconômico municipal
 # João Andrade Lima e Thomas Miguellone Lucio Martins
 #
-# Tabelas descritivas (Word + CSV) e figuras (PNG) a partir da base do 02.
+# Tabelas descritivas (Word + CSV + LaTeX) e as Figuras 1 e 2 do texto (PNG),
+# a partir da base do 02. A numeração dos arquivos é a mesma do texto.
 # =============================================================================
 
 # install.packages(c("data.table", "dplyr", "tidyr", "ggplot2", "flextable"))
@@ -43,6 +44,28 @@ formatar_tabela <- function(df, nota) {
     add_footer_lines(nota) |>
     fontsize(size = 9, part = "all") |>
     autofit()
+}
+
+# Tabela em LaTeX (booktabs) para colar no Overleaf: \input{arquivo.tex}
+# Só o "tabular"; título, fonte e nota vão no texto, como pede a ABNT.
+salvar_tex <- function(df, nome) {
+  esc <- function(x) {
+    x <- gsub("([%$&_#])", "\\\\\\1", x)
+    x <- gsub("R²", "R\\\\textsuperscript{2}", x)
+    gsub("<", "$<$", x)
+  }
+  corpo <- as.data.frame(lapply(df, \(col) esc(as.character(col))))
+  linha <- function(v) paste0(paste(v, collapse = " & "), " \\\\")
+  linhas <- apply(corpo, 1, linha)
+  # Linha separando coeficientes das estatísticas de ajuste (tabelas de regressão)
+  i_obs <- which(corpo[[1]] == "Observações")
+  if (length(i_obs) == 1) linhas <- append(linhas, "\\midrule", after = i_obs - 1)
+  tex <- c(paste0("\\begin{tabular}{l", strrep("c", ncol(df) - 1), "}"),
+           "\\toprule", linha(esc(names(df))), "\\midrule",
+           linhas, "\\bottomrule", "\\end{tabular}")
+  con <- file(file.path("resultados/tabelas", paste0(nome, ".tex")), "w", encoding = "UTF-8")
+  writeLines(tex, con)
+  close(con)
 }
 
 rotulos <- c(
@@ -164,6 +187,9 @@ names(tab3) <- c("Variável", paste0("(", 1:k, ")"))
 
 ft3 <- formatar_tabela(tab3, "Nota: correlações de Pearson entre municípios. Fonte: TSE e IBGE.")
 
+salvar_tex(tab1, "tab1_estatisticas_descritivas")
+salvar_tex(tab2, "tab2_por_regiao")
+
 save_as_docx(
   "Tabela 1 – Estatísticas descritivas"     = ft1,
   "Tabela 2 – Médias por região"            = ft2,
@@ -178,28 +204,12 @@ save_as_html(
 )
 
 
-# ---- Figura 1: distribuição da taxa de abstenção -----------------------------
-fig1 <- ggplot(base, aes(taxa_abstencao)) +
-  geom_histogram(bins = 50, fill = "steelblue", color = "white") +
-  labs(x = rotulos[["taxa_abstencao"]], y = "Número de municípios")
-salvar_figura(fig1, "fig1_hist_abstencao")
-
-
-# ---- Figura 2: abstenção por região ------------------------------------------
-fig2 <- base |>
-  mutate(regiao = reorder(regiao, taxa_abstencao, median)) |>
-  ggplot(aes(regiao, taxa_abstencao)) +
-  geom_boxplot(fill = "steelblue", alpha = 0.4, outlier.size = 0.6) +
-  labs(x = NULL, y = rotulos[["taxa_abstencao"]])
-salvar_figura(fig2, "fig2_abstencao_por_regiao")
-
-
-# ---- Figura 3: abstenção contra cada explicativa -----------------------------
+# ---- Figura 1 do texto: abstenção contra cada explicativa ------------------
 # Dispersão com a reta de MQO da regressão simples em cada painel.
 # No painel da razão, só P1–P99 para os extremos não achatarem o eixo.
 lim_razao <- quantile(base$razao_aptos_pop, c(0.01, 0.99))
 
-fig3 <- base |>
+fig1 <- base |>
   select(all_of(names(rotulos))) |>
   pivot_longer(-taxa_abstencao, names_to = "var", values_to = "valor") |>
   filter(!(var == "razao_aptos_pop" & (valor < lim_razao[1] | valor > lim_razao[2]))) |>
@@ -209,15 +219,15 @@ fig3 <- base |>
   geom_smooth(method = "lm", formula = y ~ x, se = FALSE, colour = "firebrick") +
   facet_wrap(~ var, scales = "free_x", ncol = 3, labeller = label_wrap_gen(width = 28)) +
   labs(x = NULL, y = rotulos[["taxa_abstencao"]])
-salvar_figura(fig3, "fig3_dispersao", largura = 9, altura = 7.5)
+salvar_figura(fig1, "fig1_dispersao", largura = 9, altura = 7.5)
 
 
-# ---- Figura 4: razão aptos / população (problema do cadastro) ----------------
-fig4 <- ggplot(base, aes(razao_aptos_pop)) +
+# ---- Figura 2 do texto: razão aptos / população (problema do cadastro) -------
+fig2 <- ggplot(base, aes(razao_aptos_pop)) +
   geom_histogram(bins = 60, fill = "grey50", color = "white") +
   geom_vline(xintercept = 1, color = "firebrick", linetype = "dashed") +
   labs(x = rotulos[["razao_aptos_pop"]], y = "Número de municípios")
-salvar_figura(fig4, "fig4_razao_aptos_pop")
+salvar_figura(fig2, "fig2_razao_aptos_pop")
 
 # Abre as tabelas no navegador (só em sessão interativa, como no RStudio)
 if (interactive()) browseURL(normalizePath("resultados/tabelas/tabelas_descritivas.html"))
