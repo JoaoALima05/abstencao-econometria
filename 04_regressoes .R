@@ -19,6 +19,7 @@ library(lmtest)
 dir.create("resultados/tabelas", recursive = TRUE, showWarnings = FALSE)
 
 base <- readRDS("dados/intermed/base_analise.rds")
+base <- mutate(base, uf = substr(cod_ibge, 1, 2))   # código da UF (2 primeiros dígitos)
 
 # Erro-padrão usado em todas as tabelas e testes: robusto à heterocedasticidade
 ep <- "hetero"   # HC1 (White)
@@ -165,6 +166,15 @@ robustez <- list(
 etable(modelos,  vcov = ep)
 etable(robustez, vcov = ep)
 
+# Erros agrupados por UF no modelo (4)
+ct_uf <- coeftable(m4, vcov = ~uf)
+print(ct_uf[c("log_pib_pc", "taxa_alfab"), ])
+
+# Efeitos fixos de UF (as dummies de região saem, porque são absorvidas pelos efeitos fixos)
+m_fe <- feols(taxa_abstencao ~ log_pib_pc + taxa_alfab + log_pop + pct_urbana +
+                pct_jovens + pct_idosos_70 + razao_aptos_pop | uf, data = base)
+etable(m4, m_fe, vcov = ep)        # erros HC1, como na tabela
+etable(m_fe, vcov = ~uf)           # efeitos fixos com erros agrupados por UF
 
 # ---- 7. Tabelas --------------------------------------------------------------
 estrelas <- function(p) ifelse(p < 0.01, "***", ifelse(p < 0.05, "**", ifelse(p < 0.1, "*", "")))
@@ -267,7 +277,8 @@ ft6 <- formatar_tabela(testes, paste(
 salvar_tex(tab4,   "tab4_regressoes")
 # Tabela 2 do texto: modelos (1)-(4) e as duas robustezes na mesma tabela
 tab_texto <- montar_tabela(c(modelos, list("(5) Sem razão"    = robustez[["Sem razão"]],
-                                           "(6) Sem extremos" = robustez[["Sem extremos"]])),
+                                           "(6) Sem extremos" = robustez[["Sem extremos"]],
+                                           "(7) EF de UF"     = m_fe)),
                            rotulos_coef)
 fwrite(tab_texto, "resultados/tabelas/tab_texto_modelos_robustez.csv", sep = ";", bom = TRUE)
 salvar_tex(tab_texto, "tab_texto_modelos_robustez")
