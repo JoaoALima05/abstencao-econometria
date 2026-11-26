@@ -1,0 +1,11 @@
+# Dados brutos e intermediários (grandes; são recriados pelo 01 e pelo 02)
+dados/
+
+# R e RStudio
+.Rhistory
+.RData
+.Rproj.user/
+
+# Sistema
+.DS_Store
+Thumbs.db
