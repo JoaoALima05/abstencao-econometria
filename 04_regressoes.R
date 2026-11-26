@@ -5,7 +5,9 @@
 #
 # Roteiro: escada de modelos por MQO -> Breusch-Pagan -> erros robustos (HC1)
 # -> testes t e F -> não-linearidade -> interação -> robustez (sem razão e sem
-# extremos). Tabelas em resultados/tabelas/ (Word + CSV).
+# extremos) -> erros agrupados e efeitos fixos de UF.
+# Tabelas em resultados/tabelas/ (Word, CSV e LaTeX). A Tabela 2 do texto é
+# tab_texto_modelos_robustez.tex; as tabelas 4, 5 e 6 daqui são auxiliares.
 # =============================================================================
 
 # install.packages(c("data.table", "dplyr", "fixest", "flextable", "lmtest"))
@@ -18,7 +20,8 @@ library(lmtest)
 
 dir.create("resultados/tabelas", recursive = TRUE, showWarnings = FALSE)
 
-base <- readRDS("dados/intermed/base_analise.rds")
+source("R/ler_base.R")
+base <- ler_base()
 base <- mutate(base, uf = substr(cod_ibge, 1, 2))   # código da UF (2 primeiros dígitos)
 
 # Erro-padrão usado em todas as tabelas e testes: robusto à heterocedasticidade
