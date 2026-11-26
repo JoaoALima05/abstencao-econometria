@@ -8,21 +8,14 @@ O texto completo está em [`trabalho.pdf`](trabalho.pdf).
 
 ## Como reproduzir
 
-Abra `abstencao-econometria.Rproj` no RStudio (ou rode `setwd()` na pasta do repositório) e execute:
+Abra `abstencao-econometria.Rproj` no RStudio (ou rode `setwd()` na pasta do repositório) e rode os scripts na ordem: 01, 02, 03 e 04. Na primeira execução, o download dos dados do TSE e do SIDRA leva alguns minutos.
 
-```r
-source("00_rodar_tudo.R")
-```
-
-O script instala os pacotes que faltarem e roda tudo em ordem. Na primeira execução, o download dos dados do TSE e do SIDRA leva alguns minutos.
-
-**Atalho sem download.** Para conferir só as descritivas e as regressões, mude `baixar_dados <- FALSE` no `00_rodar_tudo.R`. O 03 e o 04 leem então o `base_analise.csv` que está no repositório.
+**Atalho sem download.** Para conferir só as descritivas e as regressões, rode apenas o 03 e o 04. Eles leem o `base_analise.csv` que está no repositório.
 
 ## Estrutura
 
 | Arquivo | O que faz |
 |---|---|
-| `00_rodar_tudo.R` | Roda o projeto inteiro, na ordem |
 | `01_baixar_dados.R` | Baixa os brutos do TSE e do SIDRA para `dados/brutos/` (com cache) |
 | `02_construir_base.R` | Calcula a abstenção, compatibiliza os códigos TSE e IBGE, constrói as variáveis e salva a base |
 | `03_descritivas.R` | Tabela 1 e Figuras 1 e 2 do texto, mais tabelas auxiliares |
