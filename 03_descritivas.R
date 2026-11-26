@@ -1,10 +1,12 @@
 # =============================================================================
-# 03_descritiva.R
+# 03_descritivas.R
 # Econometria I – Abstenção eleitoral x nível socioeconômico municipal
 # João Andrade Lima e Thomas Miguellone Lucio Martins
 #
 # Tabelas descritivas (Word + CSV + LaTeX) e as Figuras 1 e 2 do texto (PNG),
-# a partir da base do 02. A numeração dos arquivos é a mesma do texto.
+# a partir da base do 02 (ou do base_analise.csv, ver R/ler_base.R).
+# A Tabela 1 e as Figuras 1 e 2 têm a numeração do texto. As tabelas 2 e 3
+# daqui (médias por região e correlações) são auxiliares e não aparecem no PDF.
 # =============================================================================
 
 # install.packages(c("data.table", "dplyr", "tidyr", "ggplot2", "flextable"))
@@ -18,7 +20,8 @@ library(flextable)
 dir.create("resultados/tabelas", recursive = TRUE, showWarnings = FALSE)
 dir.create("resultados/figuras", recursive = TRUE, showWarnings = FALSE)
 
-base <- readRDS("dados/intermed/base_analise.rds")
+source("R/ler_base.R")
+base <- ler_base()
 theme_set(theme_minimal(base_size = 11))
 
 # Números no padrão brasileiro
@@ -121,15 +124,17 @@ ft1 <- formatar_tabela(tab1, paste(
 
 # ---- Municípios com maior PIB per capita (para a seção de limitações) --------
 # O PIB per capita mede produção, não renda dos moradores.
-nomes_mun <- readRDS("dados/brutos/sidra_populacao.rds") |>
-  transmute(cod_ibge = as.integer(`Município (Código)`), municipio = Município)
-
-base |>
-  left_join(nomes_mun, by = "cod_ibge") |>
-  arrange(desc(pib_pc)) |>
-  select(municipio, pib_pc, pop, taxa_abstencao) |>
-  head(10) |>
-  print()
+# Os nomes vêm do bruto do SIDRA; sem ele (rodando só pelo CSV), mostra o código.
+arq_pop <- "dados/brutos/sidra_populacao.rds"
+top_pib <- base |> arrange(desc(pib_pc)) |> head(10)
+if (file.exists(arq_pop)) {
+  nomes_mun <- readRDS(arq_pop) |>
+    transmute(cod_ibge = as.integer(`Município (Código)`), municipio = Município)
+  top_pib <- left_join(top_pib, nomes_mun, by = "cod_ibge")
+} else {
+  top_pib <- mutate(top_pib, municipio = as.character(cod_ibge))
+}
+top_pib |> select(municipio, pib_pc, pop, taxa_abstencao) |> print()
 
 
 # ---- Tabela 2: médias por região ---------------------------------------------
