@@ -26,7 +26,7 @@ O script instala os pacotes que faltarem e roda tudo em ordem. Na primeira execu
 | `01_baixar_dados.R` | Baixa os brutos do TSE e do SIDRA para `dados/brutos/` (com cache) |
 | `02_construir_base.R` | Calcula a abstenção, compatibiliza os códigos TSE e IBGE, constrói as variáveis e salva a base |
 | `03_descritivas.R` | Tabela 1 e Figuras 1 e 2 do texto, mais tabelas auxiliares |
-| `04_regressoes.R` | Modelos (1) a (4), testes, não linearidade, interação, robustez, erros agrupados e efeitos fixos de UF |
+| `04_regressoes.R` | Modelos (1) a (4), testes, não linearidade, interação e robustez (Tabela 2 do texto) |
 | `R/ler_base.R` | Lê a base de análise (do `.rds` do 02 ou do CSV) |
 | `base_analise.csv` | Base final, uma linha por município (separador `;`, decimal `,`) |
 | `resultados/` | Tabelas (`.tex`, `.csv`, `.docx`) e figuras geradas pelos scripts |
