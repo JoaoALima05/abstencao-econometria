@@ -52,4 +52,4 @@ A Tabela 2 do texto corresponde a `resultados/tabelas/tab_texto_modelos_robustez
 
 ## Uso de inteligência artificial
 
-Usamos o Claude (Anthropic) para dúvidas de programação em R, discussão da metodologia, revisão do texto e formatação em LaTeX. Também usamos a ferramenta para organizar este repositório: renomear os arquivos, escrever este README e permitir que o 03 e o 04 leiam a base pelo CSV (`R/ler_base.R`). Os scripts de análise foram escritos pelos autores. As decisões e a interpretação são dos autores; a seção 3.6 do texto descreve o que foi verificado e corrigido. Conversas: [1](https://claude.ai/share/5711ed2f-173b-44f7-ba9a-43572d230e33) e [2](https://claude.ai/share/e4636d35-67f1-45ed-87eb-493fccad3045).
+Usamos o Claude (Anthropic) para dúvidas de programação em R, discussão da metodologia, revisão do texto e formatação em LaTeX. As decisões e a interpretação são dos autores; a seção 3.6 do texto descreve o que foi verificado e corrigido. Conversas: [1](https://claude.ai/share/5711ed2f-173b-44f7-ba9a-43572d230e33) e [2](https://claude.ai/share/e4636d35-67f1-45ed-87eb-493fccad3045).
