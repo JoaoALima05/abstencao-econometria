@@ -243,4 +243,6 @@ message("Municípios com razão aptos/população > 1: ",
         sum(base_analise$razao_aptos_pop > 1))
 
 saveRDS(base_analise, "dados/intermed/base_analise.rds")
+# Versão em CSV da base de análise (separador ";" e decimal ",", abre direto no Excel)
+fwrite(base_analise, "base_analise.csv", sep = ";", dec = ",", bom = TRUE)
 summary(base_analise)
