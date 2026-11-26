@@ -167,7 +167,7 @@ ft2 <- formatar_tabela(tab2, paste(
 
 
 # ---- Teto da alfabetização por região (motivação da interação) --------------
-# Números citados no texto: mediana e parcela de municípios acima de 95%.
+# Auxiliar (não aparece no texto): mediana e parcela de municípios acima de 95%.
 alfab_teto <- base |>
   group_by(regiao) |>
   summarise(municipios   = n(),
