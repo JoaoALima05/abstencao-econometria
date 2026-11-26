@@ -52,7 +52,9 @@ salvar_tex <- function(df, nome) {
   esc <- function(x) {
     x <- gsub("([%$&_#])", "\\\\\\1", x)
     x <- gsub("R²", "R\\\\textsuperscript{2}", x)
-    gsub("<", "$<$", x)
+    x <- gsub("<", "$<$", x)
+    # sinal de menos tipográfico nos números (ex.: -0,227 -> $-$0,227)
+    gsub("(^|\\()-([0-9])", "\\1$-$\\2", x)
   }
   corpo <- as.data.frame(lapply(df, \(col) esc(as.character(col))))
   linha <- function(v) paste0(paste(v, collapse = " & "), " \\\\")
