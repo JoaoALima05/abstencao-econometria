@@ -106,6 +106,19 @@ etable(m4, m_quad, vcov = ep)
 
 f_quad <- wald(m_quad, keep = "^I\\(", vcov = ep, print = FALSE)
 
+# Pontos de virada dos termos quadráticos (números citados no texto, seção 4.2)
+b      <- coef(m_quad)
+b_pib2 <- unname(b[grep("pib_c\\^2", names(b))])
+b_alf2 <- unname(b[grep("alfab_c\\^2", names(b))])
+
+corte_pib <- exp(mean(base$log_pib_pc) - unname(b["pib_c"]) / (2 * b_pib2))
+corte_alf <- mean(base$taxa_alfab) - unname(b["alfab_c"]) / (2 * b_alf2)
+
+message(sprintf("Renda: inclinação se anula em PIB per capita de R$ %.0f", corte_pib))
+message(sprintf("Municípios acima desse valor: %.1f%%", mean(base$pib_pc > corte_pib) * 100))
+message(sprintf("Alfabetização: inclinação se anula em %.1f%%", corte_alf))
+message(sprintf("Municípios abaixo desse nível: %d (%.1f%% da amostra)",
+                sum(base$taxa_alfab < corte_alf), mean(base$taxa_alfab < corte_alf) * 100))
 
 # ---- 5. Interação: escolaridade x região -------------------------------------
 # Modelo (4) + alfabetização x Nordeste. A dummy de Nordeste já está no modelo
@@ -195,7 +208,9 @@ salvar_tex <- function(df, nome) {
   esc <- function(x) {
     x <- gsub("([%$&_#])", "\\\\\\1", x)
     x <- gsub("R²", "R\\\\textsuperscript{2}", x)
-    gsub("<", "$<$", x)
+    x <- gsub("<", "$<$", x)
+    # sinal de menos tipográfico nos números (ex.: -0,227 -> $-$0,227)
+    gsub("(^|\\()-([0-9])", "\\1$-$\\2", x)
   }
   corpo <- as.data.frame(lapply(df, \(col) esc(as.character(col))))
   linha <- function(v) paste0(paste(v, collapse = " & "), " \\\\")
@@ -250,6 +265,12 @@ ft6 <- formatar_tabela(testes, paste(
   "Fonte: TSE e IBGE."))
 
 salvar_tex(tab4,   "tab4_regressoes")
+# Tabela 2 do texto: modelos (1)-(4) e as duas robustezes na mesma tabela
+tab_texto <- montar_tabela(c(modelos, list("(5) Sem razão"    = robustez[["Sem razão"]],
+                                           "(6) Sem extremos" = robustez[["Sem extremos"]])),
+                           rotulos_coef)
+fwrite(tab_texto, "resultados/tabelas/tab_texto_modelos_robustez.csv", sep = ";", bom = TRUE)
+salvar_tex(tab_texto, "tab_texto_modelos_robustez")
 salvar_tex(tab5,   "tab5_robustez")
 salvar_tex(testes, "tab6_testes")
 
