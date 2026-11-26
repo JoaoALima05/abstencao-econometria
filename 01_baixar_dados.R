@@ -4,8 +4,10 @@
 # João Andrade Lima e Thomas Miguellone Lucio Martins
 #
 # Este script só baixa os dados brutos e os salva em dados/brutos/.
-# Cada download é feito apenas se o arquivo ainda não existir, de modo que o
-# script roda sem internet quando os brutos já estão no repositório.
+# Cada download é feito apenas se o arquivo ainda não existir, de modo que,
+# depois da primeira execução, o script roda sem internet. Os brutos não ficam
+# no repositório (são grandes); o 03 e o 04 podem rodar direto do
+# base_analise.csv, sem este script.
 # A limpeza e a construção das variáveis ficam em 02_construir_base.R.
 # =============================================================================
 
